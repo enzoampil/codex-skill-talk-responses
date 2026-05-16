@@ -32,6 +32,15 @@ Speak this response.
 The skill uses macOS `say`, so it is primarily for local macOS Codex sessions.
 If `say` is unavailable or audio is blocked, Codex will keep responding in text.
 
+## Security Notes
+
+- The helper does not use the shell, make network requests, or write files.
+- It prefers `/usr/bin/say` on macOS and passes speech text as a plain process
+  argument.
+- It truncates long input before speaking.
+- Agents are instructed not to speak secrets, credentials, private keys, tokens,
+  large raw logs, or huge generated artifacts.
+
 ## Contents
 
 ```text

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -11,9 +12,12 @@ import sys
 
 
 MAX_CHARS_DEFAULT = 4000
+MAX_INPUT_CHARS_DEFAULT = 100_000
 
 
-def sanitize(text: str, max_chars: int) -> str:
+def sanitize(text: str, max_chars: int, max_input_chars: int) -> str:
+    if len(text) > max_input_chars:
+        text = text[:max_input_chars]
     text = text.strip()
     text = re.sub(r"```.*?```", " code block omitted. ", text, flags=re.DOTALL)
     text = re.sub(r"`([^`]+)`", r"\1", text)
@@ -32,6 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--voice", default="", help="Optional macOS say voice.")
     parser.add_argument("--rate", type=int, default=0, help="Optional speech rate.")
     parser.add_argument("--max-chars", type=int, default=MAX_CHARS_DEFAULT)
+    parser.add_argument("--max-input-chars", type=int, default=MAX_INPUT_CHARS_DEFAULT)
     parser.add_argument("--dry-run", action="store_true", help="Print sanitized text without speaking.")
     return parser.parse_args()
 
@@ -39,7 +44,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     raw_text = sys.stdin.read() if args.stdin else args.text
-    text = sanitize(raw_text, max(1, args.max_chars))
+    text = sanitize(raw_text, max(1, args.max_chars), max(1, args.max_input_chars))
     if not text:
         return 0
 
@@ -47,7 +52,7 @@ def main() -> int:
         print(text)
         return 0
 
-    say_path = shutil.which("say")
+    say_path = "/usr/bin/say" if Path("/usr/bin/say").exists() else shutil.which("say")
     if not say_path:
         print("macOS `say` command not found.", file=sys.stderr)
         return 127
