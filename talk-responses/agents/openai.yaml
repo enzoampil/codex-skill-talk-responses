@@ -1,0 +1,4 @@
+interface:
+  display_name: "Talk Responses"
+  short_description: "Speak Codex responses aloud on macOS when requested."
+  default_prompt: "Talk in your responses for this session."
